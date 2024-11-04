@@ -3,6 +3,7 @@ Assignment 4 readme File
 ------------------------------------------------------------------------
 Student 1: What is your name?
 
+Kyle Noah Hiers
 
 
 ------------------------------------------------------------------------
@@ -64,6 +65,7 @@ guide, enter your name in the space below the following affirmation:
 This paper represents my own work in accordance with University
 regulations.
 
+Kyle Noah Hiers
 
 
 ------------------------------------------------------------------------
@@ -137,13 +139,13 @@ the error manifests itself or is "noticed" by the client.
 
       Executable         Function with the underlying error
 ===============================================================
-         ./bdtBad1        
+         ./bdtBad1        BDT_insert()
 ---------------------------------------------------------------
-         ./bdtBad2        
+         ./bdtBad2        BDT_rm()
 ---------------------------------------------------------------
-         ./bdtBad3        
+         ./bdtBad3        BDT_insert()
 ---------------------------------------------------------------
-         ./bdtBad4        
+         ./bdtBad4        BDT_toString()
 ---------------------------------------------------------------
          ./bdtBad5        
 ===============================================================
