@@ -145,7 +145,8 @@ the error manifests itself or is "noticed" by the client.
 ---------------------------------------------------------------
          ./bdtBad3        BDT_insert()
 ---------------------------------------------------------------
-         ./bdtBad4        BDT_toString() /*possibly in BDT_strcatAccumulate()*/
+         ./bdtBad4        BDT_toString() 
+            /*possibly in BDT_strcatAccumulate()*/
 ---------------------------------------------------------------
          ./bdtBad5        BDT_findNode()
 ===============================================================
@@ -153,6 +154,60 @@ the error manifests itself or is "noticed" by the client.
 ------------------------------------------------------------------------
 What are your critiques of the given DT implementations, as
 specified in Step 2.5?
+The following is a list of critiques of the implementation split up 
+into issues with the interface and issues with the implementation.
+
+INTERFACE:
+      - In nodeDT.h multiple functions 
+        take parameters of type Path_T which
+        Is an internal abstraction of a Path defined in Path.h. It is 
+        not best practice to expose internal representations which are 
+        used to implement the interface to the user when they are not
+        explicitly defined by the interface itself (in this case
+        being seperately defined in path.h) to improve this it would be 
+        better to simply take in path as a string and abstract the 
+        Path_T internal typing away from the user.
+
+IMPLEMENTATION:
+      - one issue in the implementation which makes it very difficult
+      for someone attempting to rework the code is the way in which 
+      the implementation implements lexographic ordering. This breaks a 
+      few programming best practices which I will describe here. 
+      First to describe the way it is implemented: the Node_new 
+      function defines a variable called ulIndex which is meant
+      to be assigned to the proper index in the parent nodes child
+      array eg. the index with the proper lexographic ordering
+      . The first issue is that it is EXTREMELY unclear where this 
+      ulIndex is assigned and thus where lexographic ordering is taken 
+      to account. After very close analysis we realize that ulIndex is 
+      assigned when its address is passed 
+      as a pointer to the Node_hasChild function. 
+      This function ultimately does the logic for finding the proper 
+      lexographicly ordered index and updates the value at the address.
+      This nested and unclear implementation of lexographic ordering
+      breaks two best practices 
+      that come to mind. First, the nested nature 
+      of the assigning of the ulIndex variable 
+      makes it very hard to follow, 
+      generally speaking, important variables especially ones that 
+      perform key logic functions that are treated as invariants 
+      such as this one should be initialized clearly in the function
+      which they are called. Nesting this assignment in a function by 
+      passing the value as an address, particularly a function with
+      an unassuming name of "hasChild" which is actually only called
+      in an if(statement) makes the 
+      logic very unclear and hard to finding.
+      Specifically, important logic and assignment should be clear
+      and not deeply nested, and, functions that implement important 
+      logic should include the logic they are
+       implementing clearly in the name
+      in this case "hasChild" is not sufficient.
+       Now this functionality
+      is expressed in the function comment
+       which makes it slightly better
+      but there is still no clear 
+      indication to a developer where lexographic
+      ordering - an important invariant - is being implemented.
 
 
 
