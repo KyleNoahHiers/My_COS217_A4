@@ -46,17 +46,27 @@ boolean CheckerDT_Node_isValid(Node_T oNNode)
 
 /*
    Performs a pre-order traversal of the tree rooted at oNNode.
-   Returns FALSE if a broken invariant is found and
+   Calculates the size of the tree and stores it in the location pointed
+   to by total.
+   Returns FALSE if:
+   a. a duplicate node is found, then updates duplicateNodeFound to 1
+   b. Node_getNumChildren claims more children than Node_getChild 
+   returns
+   c. wrong lexicographic ordering is found, then updates 
+   orderWrongOccured to 1
    returns TRUE otherwise.
 
-   You may want to change this function's return type or
-   parameter list to facilitate constructing your checks.
-   If you do, you should update this function comment.
 */
-static boolean CheckerDT_treeCheck(Node_T oNNode, int* orderWrongOccured)
+static boolean CheckerDT_treeCheck(Node_T oNNode, 
+int* orderWrongOccured, int* duplicateNodeFound, size_t* total)
 {
    size_t ulIndex;
    Node_T prevNode = NULL;
+
+   assert(total!= NULL);
+   assert(orderWrongOccured!= NULL);
+   assert(duplicateNodeFound!= NULL);
+
    if (oNNode != NULL)
    {
 
@@ -64,6 +74,9 @@ static boolean CheckerDT_treeCheck(Node_T oNNode, int* orderWrongOccured)
       /* If not, pass that failure back up immediately */
       if (!CheckerDT_Node_isValid(oNNode))
          return FALSE;
+
+      /* for first node set total to one*/
+      if (*total == 0) *total = 1;
 
       /* Recur on every child of oNNode */
       for (ulIndex = 0; ulIndex < Node_getNumChildren(oNNode); ulIndex++)
@@ -83,14 +96,21 @@ static boolean CheckerDT_treeCheck(Node_T oNNode, int* orderWrongOccured)
             *orderWrongOccured = 1; 
             return FALSE;
          }
+          if (prevNode!= NULL && Path_comparePath(Node_getPath(oNChild),
+           Node_getPath(prevNode)) == 0 && !*duplicateNodeFound)
+         {
+            *duplicateNodeFound = 1; 
+            return FALSE;
+         }
 
          /* if recurring down one subtree results in a failed check
             farther down, passes the failure back up immediately */
          
-         if(!CheckerDT_treeCheck(oNChild, orderWrongOccured))
+         if(!CheckerDT_treeCheck(oNChild, orderWrongOccured, duplicateNodeFound, total))
             return FALSE;
 
          prevNode = oNChild;
+         *total += 1;
 
         
       }
@@ -98,11 +118,15 @@ static boolean CheckerDT_treeCheck(Node_T oNNode, int* orderWrongOccured)
    return TRUE;
 }
 
+
+
 /* see checkerDT.h for specification */
 boolean CheckerDT_isValid(boolean bIsInitialized, Node_T oNRoot,
                           size_t ulCount) {
 boolean result;
 int orderWrong = 0;
+int duplicateNodeFound = 0;
+size_t total = 0;
    /* Sample check on a top-level data structure invariant:
       if the DT is not initialized, its count should be 0. */
    if(!bIsInitialized)
@@ -111,10 +135,21 @@ int orderWrong = 0;
          return FALSE;
       }
 
+
    /* Now checks invariants recursively at each node from the root. */
-   result = CheckerDT_treeCheck(oNRoot, &orderWrong);
+   result = CheckerDT_treeCheck(oNRoot, &orderWrong, &duplicateNodeFound, 
+   &total);
    if (orderWrong) {
       fprintf(stderr, "Nodes stored in the wrong order\n");
+   }
+   if (duplicateNodeFound) {
+      fprintf(stderr, "Two nodes with the same path exist in the DT\n");
+   }
+   if (total != ulCount){ 
+      fprintf(stderr, "The total number of nodes (in ulCount) is not being updated properly \n");
+      /* set result to false since tree check helper function 
+      does not internally check for this condition */
+      result = FALSE;
    }
    return result;
 }
