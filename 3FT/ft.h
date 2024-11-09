@@ -139,12 +139,6 @@ int FT_destroy(void);
   Returns a string representation of the
   data structure, or NULL if the structure is
   not initialized or there is an allocation error.
-
-  The representation is depth-first with files
-  before directories at any given level, and nodes
-  of the same type ordered lexicographically.
-
-  Allocates memory for the returned string,
   which is then owned by client!
 */
 char *FT_toString(void);

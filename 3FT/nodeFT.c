@@ -8,7 +8,7 @@
 #include <string.h>
 #include "dynarray.h"
 #include "nodeDT.h"
-#include "checkerDT.h"
+#include "checkerFT.h"
 
 /* A node in a DT */
 struct node {
